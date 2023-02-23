@@ -85,7 +85,7 @@ A list of commonly used resources that I find helpful are listed in the acknowle
 * [MAX 30101 Sensor](https://www.sparkfun.com/products/16474)
 * [Micro OLED](https://www.sparkfun.com/products/14532)
 * 2x [50mm QWIIC Cables](https://www.sparkfun.com/products/14426)
-* 1x [10mm QWIIC Cables](https://www.sparkfun.com/products/14427)
+* 1x [100mm QWIIC Cables](https://www.sparkfun.com/products/14427)
 * [USB-C to PC Cable](https://www.sparkfun.com/products/14743)
 
 ## Software
