@@ -1,7 +1,7 @@
 This is a pretty simple, yet functional case for the roast-meter, which incorporates space for a LIPO battery.
 
 The files prints without any support with 0.2 layer height and a 0.4mm Nozzle.
-Filamet type PLA
+Filament type PLA
 
 Plase not you need to add a 16mm pin to press the D10 button on the artemis board.
 The pin is designed to be made of a piece of 1.75mm filament.
