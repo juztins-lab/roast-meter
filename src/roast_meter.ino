@@ -1,3 +1,4 @@
+// VERSION 1.0.0-rc.1
 #include <Wire.h>
 #include "MAX30105.h"
 #include <SFE_MicroOLED.h>
