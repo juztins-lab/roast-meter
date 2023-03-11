@@ -115,8 +115,9 @@ A list of commonly used resources that I find helpful are listed in the acknowle
 
 <!-- ROADMAP -->
 ## Roadmap
-* Calibration against Agtron Gourmet Scale
+* ~~Calibration against Agtron Gourmet Scale~~ (DONE)
 * Add battery, on/off button
+
 See the [open issues](https://github.com/juztins-lab/roast-meter/issues) for a list of proposed features (and known issues).
 
 
