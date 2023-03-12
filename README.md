@@ -122,7 +122,7 @@ If you are not confident at soldering maybe stick to the non-battery version as 
 
 Step 1: Connect a 50mm QWICC cable to the Artemis board - These cables cannot be mounted wrong and will slide in easily. Be carefull not to break the connectors though.
 
-Step 2: Mount the artemis baord in the base - It is pretty self-explanatory. 
+Step 2: Mount the artemis baord in the base - It is pretty self-explanatory, but [here](https://github.com/juztins-lab/roast-meter/blob/main/assets/Case%20with%20board%20mounted.jpg) is a picture 
 
 
 Step 3: Prepare the glass for the case.
