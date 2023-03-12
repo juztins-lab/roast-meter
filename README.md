@@ -101,10 +101,53 @@ A list of commonly used resources that I find helpful are listed in the acknowle
 * a ruler
 * Pliers and other normal hand-tools that most of you would have at hand
 
+If you are building the battery powered version:
+* [LiPo Battery with JST Connector no bigger then 35 x 25 mm](https://www.amazon.com/Battery-Rechargeable-Lithium-Polymer-Connector/dp/B07BTWMM8H/ref=sr_1_1?crid=3606UD51RUMWA&keywords=lipo+3.7+400mah+jx&qid=1678641789&refresh=1&sprefix=lipo+3.7+400mah+jx%2Caps%2C260&sr=8-1)
+* [5mm slide switch (SS12F15)](https://www.amazon.com/dp/B08H594X92/ref=redir_mobile_desktop?_encoding=UTF8&aaxitk=6791b0967d3006c0d39f902ecaf5c135&content-id=amzn1.sym.7dd77237-72be-4809-b5b5-d553eab7ad9d%3Aamzn1.sym.7dd77237-72be-4809-b5b5-d553eab7ad9d&hsa_cr_id=3406948240101&pd_rd_plhdr=t&pd_rd_r=20d6625e-d387-4249-9877-2d476d60e8de&pd_rd_w=7eRSz&pd_rd_wg=pbMm2&qid=1678642098&ref_=sbx_be_s_sparkle_mcd_asin_1_img&sr=1-2-9e67e56a-6f64-441f-a281-df67fc737124)
+* Cables
+* Soldering iron and soldering tools
+
 ### Installation
 
 ## Assembly
-* Guide coming soon
+Assembling the roast meter is realtively simple and anyone with a bit of basic tinkering skills should be able to make the roast meter.
+The hardest part is probably cutting the glass, but since you have most likely bought an ample amount then you can afford to break some.
+
+First choose the right 3D print models.
+The base is the same for both the battery and non-battery model.
+For the top make sure you choose the model which is correct for your requirements.
+NOTE: There is no difference in the measurement performance of the battery vs. non-battery version.
+The only difference is that with the non-battery version you need to power the meter from an external power source, whereas the battery powered version is powered by the build in LiPo battery cell.
+If you are not confident at soldering maybe stick to the non-battery version as it is then pretty plug and play.
+
+Step 1: Connect a 50mm QWICC cable to the Artemis board - These cables cannot be mounted wrong and will slide in easily. Be carefull not to break the connectors though.
+
+Step 2: Mount the artemis baord in the base - It is pretty self-explanatory. 
+
+
+Step 3: Prepare the glass for the case.
+- Take a lab slide and measure 25 mm length and mark with a permanent marker on the glass.
+- Place the glass on a hard surface and place a ruler (Best is metal) on the glass and scrape a line in the glass with the stanley knife.
+- You can now break the glass off so that you end up with a piece that is app. 25 x 25mm
+- Use the stanley knife and the ruler to nip of a couple of mm's from one of the corners.
+
+Verify the glass fits in the 3d printed top.
+
+Step 4: It is time to glue
+- Take your super glue and place 4 tiny drops of glue on the 3D printed to, where the glass needs to go.
+- With glue less is more - we are really talking about a tiny drop 
+- Plase the glass carefully so that it is tight on the top corner of the chamfer made for the glass.
+- Wait for the glue to cure and make sure you clean the glass properly for any residue of glue
+
+Step 5: Wire up the sensor QWICC port to the display QWICC port with a 50mm cable
+
+Step 6: Mount the sensors using M3 x 4mm screws
+
+Step 7: Connect the QWICC port on the micro-display to the artemis board
+
+Step 8: Assemble case
+
+
 
 ## Script install
 * Install the Arduino IDE software that you just downloaded.
