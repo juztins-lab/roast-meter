@@ -93,6 +93,14 @@ A list of commonly used resources that I find helpful are listed in the acknowle
 * [Micro OLED Library](https://github.com/sparkfun/SparkFun_Micro_OLED_Arduino_Library/archive/refs/heads/main.zip)
 * [MAX30101 Library](https://github.com/sparkfun/SparkFun_MAX3010x_Sensor_Library/archive/refs/heads/master.zip)
 
+## Tools and Parts Required
+* [Lab slides, 1mm thick and 25.4 mm wide](https://www.amazon.com/AmScope-BS-72P-100S-22-Pre-Cleaned-Microscope-Coverslips/dp/B00L1S93PS/ref=sr_1_6?crid=363P8HPSXU7IV&keywords=lab+slides+7105&qid=1678640185&sprefix=lab+slides+7105%2Caps%2C251&sr=8-6)
+* Super Glue 
+* A Stanley knife with a new blade to cut the glass (not pretty but it works after a few attempts
+* M3 screws in 4mm and 8mm length
+* a ruler
+* Pliers and other normal hand-tools that most of you would have at hand
+
 ### Installation
 
 ## Assembly
