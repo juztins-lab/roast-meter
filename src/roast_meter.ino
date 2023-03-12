@@ -1,4 +1,4 @@
-// VERSION 1.0.0-rc.1
+// VERSION 1.0.0-rc.2
 #include <Wire.h>
 #include "MAX30105.h"
 #include <SFE_MicroOLED.h>
@@ -28,14 +28,14 @@ void displayMeasurement(int rLevel) {
   int calibratedReading = f(rLevel);
   int centerPadding = 4 - String(calibratedReading).length();
   String paddingText = multiplyChar(' ', centerPadding);
-  
+
   if (rLevel == 0) {
     oled.setFontType(1);
     oled.print("Please load   sample!");
     oled.display();
     return;
   }
-  
+
   oled.setFontType(3);
   oled.print(paddingText);
   oled.print(calibratedReading);
@@ -54,15 +54,35 @@ int f(int x) {
   return x - (intersectionPoint - x) * deviation;
 }
 
+byte intToHex(int num) {
+  // Convert the integer to hexadecimal string
+  String hexString = String(num, HEX);
+
+  // Convert the hexadecimal string to byte
+  byte hexByte = 0;
+  for (int i = 0; i < hexString.length(); i++) {
+    char c = hexString.charAt(i);
+
+    if (isDigit(c)) {
+      hexByte = (hexByte << 4) + (c - '0');
+    } else {
+      c = toUpperCase(c);
+      hexByte = (hexByte << 4) + (c - 'A' + 10);
+    }
+  }
+
+  return hexByte;
+}
+
 void setup() {
   Serial.begin(9600);
 
   Wire.begin();
-  oled.begin();     // Initialize the OLED
-  oled.clear(ALL);  // Clear the display's internal memory
-  oled.clear(PAGE); // Clear the buffer.
+  oled.begin();      // Initialize the OLED
+  oled.clear(ALL);   // Clear the display's internal memory
+  oled.clear(PAGE);  // Clear the buffer.
 
-  delay(100);       // Delay 100 ms
+  delay(100);  // Delay 100 ms
   oled.setFontType(3);
 
   // Initialize sensor
@@ -73,13 +93,14 @@ void setup() {
       ;
   }
 
-  //Setup to sense up to 18 inches, max LED brightness
-  byte ledBrightness = 0x24;  //Options: 0=Off to 255=50mA
-  byte sampleAverage = 32;    //Options: 1, 2, 4, 8, 16, 32
-  byte ledMode = 2;           //Options: 1 = Red only, 2 = Red + IR, 3 = Red + IR + Green
-  int sampleRate = 3200;      //Options: 50, 100, 200, 400, 800, 1000, 1600, 3200
-  int pulseWidth = 411;       //Options: 69, 118, 215, 411
-  int adcRange = 4096;        //Options: 2048, 4096, 8192, 16384
+  // Variable used to calibrate your sensor, change the value below +/- 1 till you get an unbleached V60 paper to read between 180-190 values on the screen.
+  byte ledBrightness = intToHex(31);  //Options: 0=Off to 255=50mA
+
+  byte sampleAverage = 32;  //Options: 1, 2, 4, 8, 16, 32
+  byte ledMode = 2;         //Options: 1 = Red only, 2 = Red + IR, 3 = Red + IR + Green
+  int sampleRate = 3200;    //Options: 50, 100, 200, 400, 800, 1000, 1600, 3200
+  int pulseWidth = 411;     //Options: 69, 118, 215, 411
+  int adcRange = 4096;      //Options: 2048, 4096, 8192, 16384
 
   particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange);  //Configure sensor with these settings
 
