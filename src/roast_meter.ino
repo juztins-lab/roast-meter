@@ -1,4 +1,4 @@
-// VERSION 1.0.0-rc.2
+// VERSION 1.0.0-rc.3
 #include <Wire.h>
 #include "MAX30105.h"
 #include <SFE_MicroOLED.h>
@@ -48,8 +48,8 @@ void displayMeasurement(int rLevel) {
 }
 
 int f(int x) {
-  int intersectionPoint = 112;
-  float deviation = 0.164;
+  int intersectionPoint = 117;
+  float deviation = 0.165;
 
   return x - (intersectionPoint - x) * deviation;
 }
@@ -94,7 +94,7 @@ void setup() {
   }
 
   // Variable used to calibrate your sensor, change the value below +/- 1 till you get an unbleached V60 paper to read between 180-190 values on the screen.
-  byte ledBrightness = intToHex(31);  //Options: 0=Off to 255=50mA
+  byte ledBrightness = intToHex(37);  //Options: 0=Off to 255=50mA
 
   byte sampleAverage = 32;  //Options: 1, 2, 4, 8, 16, 32
   byte ledMode = 2;         //Options: 1 = Red only, 2 = Red + IR, 3 = Red + IR + Green
