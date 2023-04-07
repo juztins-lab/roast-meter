@@ -72,7 +72,7 @@ https://github.com/juztins-lab/roast-meter/wiki/Roast-Meter-Assembly-Instruction
 https://github.com/juztins-lab/roast-meter/wiki/Roast-Meter-User's-Guide
 
 ## Calibration process
-https://github.com/juztins-lab/roast-meter/wiki/Roast-Meter-Sensor-Calibration
+https://github.com/juztins-lab/roast-meter/wiki/Roast-Meter-User's-Guide#calibration-methods
 
 <!-- ROADMAP -->
 ## Roadmap
