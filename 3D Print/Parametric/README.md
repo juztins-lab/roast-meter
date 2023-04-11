@@ -6,21 +6,22 @@ roast-meter case - Fusion 360 Parametric model
 
 April 8, 2023 - v4 Commit to GitHub v4 of Parametric model.
 April 8, 2023 - v10 Fixed OLED and RST+D10 Location so that they don't move when resizing case
+April 10, 2023 - v14 New Parametric model to work with updated script. Script v0.2 now allows for toggling switch geometry on/off and orientation of OLED screen Horiz/Vert.
 
 ## future updates
 
 Planned updates:
--update customizer script to toggle geometry for switch
--update model and customizer to allow for rotation of OLED Screen to preferred orientation
+Fix script to default Switch ON and OLED Horiz.
 
 ## description
 
 This parametric version of the case is based around the v2.0 model by Nate.
 The model is fully described. Almost all dimensions are described with a labeled parameter.
 
-Size of case can be adjusted using customizer script below.
-OR
-Change UserParameters: Battery_Length and Battery_Width. Just be careful not to change other parameters as results may not be desirable.
+Case can be adjusted using customizer script below. (Preferable)
+Change UserParameters: Battery_Length, Battery_Width, OLED Orientation, and Power switch. Just be careful not to change other parameters as results may not be desirable.
+
+Size of case can also be adjusted in the User Parameters with Battery Width and Length params. Avoid changing other items as they might break the model.
 
 ## customizer script
 
@@ -32,10 +33,11 @@ Install Scripts or addins from GitHub
 <https://apps.autodesk.com/FUSION/en/Detail/Index?id=789800822168335025>
 
 roast-analyzer-case-customizer
-Use above install script to install
-<https://github.com/PatrickFrN/roast-meter-Fusion360_roast-meter-case-customizer>
+Use above install script to install directly from the directory (point to the base GitHub directory of the script ../3D Print/Parametric/roast-lmeter-case-customizer/)
 
 Run the script, two slider options one for Battery Length, other for Width. Can type in size as well. Model auto updates as sizes are changed. OK to save changes, then export lid and base for 3d printing. Note that the Lid exports by default upside down, don't forget to flip it in the slicer (using 3D Print Plus, you can export the Lid with the Z axis flipped so you don't have to flip it in the slicer)
+Drop down for OLED orientation - Vertical or Horizontal
+Drop down for Power switch - off or on
 
 Recommend for exporting the lid and base - not strictly needed, but can easily export the two components at the same time without using the default make script:
 Use above install script to install
@@ -47,6 +49,9 @@ Alt exporter 3D Print Plus is also excellent:
 ## STL files
 
 Exported v4 lid and base with min size case dimensions. Lid is in proper orientation for printing.
+Exported v14 Base
+Exported v14 Lid WITH Power switch - horizontal OLED
+Exported v14 Lid NO Power switch - horizontal OLED
 
 ## printing info
 

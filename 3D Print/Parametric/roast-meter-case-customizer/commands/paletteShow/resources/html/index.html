@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="static/palette.js"></script>
+</head>
+<body>
+<div>
+
+    <h1>Fusion 360 Palette Sample</h1>
+    <div>
+        <a href="https://help.autodesk.com/view/fusion360/ENU/?guid=GUID-6C0C8148-98D0-4DBC-A4EC-D8E03A8A3B5B">
+            Learn more about working with Palettes in Fusion 360
+        </a>
+    </div>
+    <br><hr>
+
+    <h3>Send Data to HTML Event Handler</h3>
+    <div style='margin-left: 30px;'>
+        <label for="sampleData"><b>Data to send:</b></label>
+        <input type="text" id="sampleData" value="Enter Some Text"><br/><br/>
+        <button type='button' onclick='sendInfoToFusion()' style='background-color: #cccccc; padding: 5px'>
+            <b>Send HTML Event</b>
+        </button>
+    </div>
+
+    <h3>HTML Event Response Value:</h3>
+    <div id='returnValue' style='margin-left: 30px;'>Response</div>
+
+    <h3>Message from "Send to Palette" Command</h3>
+    <div style='margin-left: 30px;'>
+        <p id='fusionMessage'>Message from Fusion</p>
+        <br/><br/>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+	"autodeskProduct":	"Fusion360",
+	"type":	"addin",
+	"id":	"332ce2cf-2ee4-419d-9cab-660a4c58540e",
+	"author":	"Patrick Notton",
+	"description":	{
+		"":	"Customizer Script to automatically adjust the case size with User Input for the battery size"
+	},
+	"version":	"0.2",
+	"runOnStartup":	false,
+	"supportedOS":	"windows|mac",
+	"editEnabled":	true
+}
