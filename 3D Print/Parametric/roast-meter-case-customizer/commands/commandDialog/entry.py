@@ -1,7 +1,8 @@
 #roast-meter-case-customizer
 #revisions
 #v0.1 April, 8, 2023 Initial commit
-#v0.2 April 10, 2023 - code updated to allow for toggle of switch geometry and rotation of OLED screen to fit vertically. Edits by JakeG  
+#v0.2 April 10, 2023 - code updated to allow for toggle of switch geometry and rotation of OLED screen to fit vertically. Edits by Jake_G  
+#v0.3 April 11, 2023 - code updated to correct toggle swtiches Edits by Jake_G
 
 import adsk.core, adsk.fusion
 import os
@@ -47,7 +48,11 @@ OLEDHorizontalVParam = userParams.itemByName('Lid_OLED_PCB_Horizontal_Riser_Loca
 OLEDHorizontalHParam = userParams.itemByName('Lid_OLED_PCB_Horizontal_Riser_Location_Center_H')
 OLEDOrientationVParam = userParams.itemByName('Lid_OLED_PCB_Orientation_V')
 OLEDOrientationHParam = userParams.itemByName('Lid_OLED_PCB_Orientation_H')
+OLEDOrientationParam = userParams.itemByName('Lid_OLED_PCB_Orientation')
 switchParam = userParams.itemByName('HasBattery')
+OLEDIsVertical = userParams.itemByName('VerticalOLED')
+
+
 # get timeline
 tl :adsk.fusion.Design = design.timeline
 
@@ -145,11 +150,14 @@ def command_created(args: adsk.core.CommandCreatedEventArgs):
     OLEDOrientationDropdownItems = OLEDOrientationDropdown.listItems
     OLEDOrientationDropdownItems = OLEDOrientationDropdown.listItems.add('Horizontal',False,"")
     OLEDOrientationDropdownItems = OLEDOrientationDropdown.listItems.add('Vertical',True,"")
+    OLEDOrientationDropdown.listItems.item(int(OLEDIsVertical.expression)).isSelected = True
+
     powerSwitchDropdown = inputs.addDropDownCommandInput('Power_Switch_Dropdown','Power Switch',1)
     powerSwitchDropdownItems = powerSwitchDropdown.listItems
-    powerSwitchDropdownItems = powerSwitchDropdown.listItems.add('Yes', False, "")
     powerSwitchDropdownItems = powerSwitchDropdown.listItems.add('No', True, "")
-    
+    powerSwitchDropdownItems = powerSwitchDropdown.listItems.add('Yes', False, "")
+    powerSwitchDropdown.listItems.item(int(switchParam.expression)).isSelected = True
+
     # TODO Connect to the events that are needed by this command.
     futil.add_handler(args.command.execute, command_execute, local_handlers=local_handlers)
     futil.add_handler(args.command.inputChanged, command_input_changed, local_handlers=local_handlers)
@@ -176,16 +184,18 @@ def command_execute(args: adsk.core.CommandEventArgs):
     batteryWidthParamNew: adsk.core.FloatSliderCommandInput = inputs.itemById('float_battery_width')
     extrudeSuppress: adsk.core.DropDownCommandInput = inputs.itemById('Power_Switch_Dropdown')
     rotateOLED: adsk.core.DropDownCommandInput = inputs.itemById('OLED_Orientation_Dropdown')
-    
+
     userParams.itemByName('Battery_Length').expression = batteryLengthParamNew.expressionOne
     userParams.itemByName('Battery_Width').expression = batteryWidthParamNew.expressionOne
     if rotateOLED.selectedItem.name == 'Horizontal':
-        #ui.messageBox('Horizontal Selected')    
+        #ui.messageBox('Horizontal Selected')
+        userParams.itemByName('VerticalOLED').expression = '0'
         userParams.itemByName('Lid_OLED_PCB_Orientation').expression = OLEDOrientationHParam.expression
         userParams.itemByName('Lid_OLED_PCB_Riser_Location_Center_V').expression = OLEDHorizontalVParam.expression
         userParams.itemByName('Lid_OLED_PCB_Riser_Location_Center_H').expression = OLEDHorizontalHParam.expression
     elif rotateOLED.selectedItem.name == 'Vertical':
-        #ui.messageBox('Vertical Selected')    
+        #ui.messageBox('Vertical Selected')
+        userParams.itemByName('VerticalOLED').expression = '1'
         userParams.itemByName('Lid_OLED_PCB_Orientation').expression = OLEDOrientationVParam.expression
         userParams.itemByName('Lid_OLED_PCB_Riser_Location_Center_V').expression = OLEDVerticalVParam.expression
         userParams.itemByName('Lid_OLED_PCB_Riser_Location_Center_H').expression = OLEDVerticalHParam.expression

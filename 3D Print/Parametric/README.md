@@ -7,11 +7,11 @@ roast-meter case - Fusion 360 Parametric model
 April 8, 2023 - v4 Commit to GitHub v4 of Parametric model.
 April 8, 2023 - v10 Fixed OLED and RST+D10 Location so that they don't move when resizing case
 April 10, 2023 - v14 New Parametric model to work with updated script. Script v0.2 now allows for toggling switch geometry on/off and orientation of OLED screen Horiz/Vert.
+April 11, 2023 - v15 + v7 with Sensor tray. Sensor tray to secure MAX30101 sensor PCB position. Script v0.3 fixed to list OLED window and power switch options correctly.  Old models removed.
 
 ## future updates
 
-Planned updates:
-Fix script to default Switch ON and OLED Horiz.
+Clean up script code.
 
 ## description
 
@@ -48,10 +48,12 @@ Alt exporter 3D Print Plus is also excellent:
 
 ## STL files
 
-Exported v4 lid and base with min size case dimensions. Lid is in proper orientation for printing.
-Exported v14 Base
-Exported v14 Lid WITH Power switch - horizontal OLED
-Exported v14 Lid NO Power switch - horizontal OLED
+Exported v15 Base
+Exported v15 Lid WITH Power switch - horizontal OLED
+Exported v15 Lid NO Power switch - horizontal OLED
+Exported v7 Sensor Tray
+Exported v7 Sensor Tray Lid - WITH Power Switch
+Exported v7 Sensor Tray Lid - NO Power Switch
 
 ## printing info
 
@@ -68,6 +70,8 @@ Assembly: See project assembly instructions
 (2) Lab slides, 1mm thick and 25.4 mm wide
 (4) M3 x 16mm screws
 (8) M3 x 4mm screws
+*(4) M3 x 8mm screws for sensor tray - will replace (2) M3 x 4mm screws  
+
 Super Glue
 If building the internal battery powered version also needed:
     LiPo Battery with JST Connector no bigger then 35 x 25 mm
