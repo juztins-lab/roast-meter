@@ -73,7 +73,6 @@ void setup() {
   }
 
   // The variable below calibrates the LED output on your hardware.  
-  //    With ledBrightnessOffset = 0, change the value below +/- 1 until you get an unbleached V60 paper to read between 180-190 on the display.
   byte ledBrightness = 34;
   
   byte sampleAverage = 4;   //Options: 1, 2, 4, 8, 16, --32--
