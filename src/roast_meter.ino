@@ -1,4 +1,4 @@
-// VERSION 1.0.0
+// VERSION 1.0.1-beta
 #include <Wire.h>
 #include "MAX30105.h"
 #include <SFE_MicroOLED.h>
@@ -72,16 +72,22 @@ void setup() {
       ;
   }
 
-  // The variable below calibrates the LED output on your hardware.  
-  byte ledBrightness = 34;
+  // The variable below calibrates the LED output on your hardware.
+  byte ledBrightness = 135;
   
   byte sampleAverage = 4;   //Options: 1, 2, 4, 8, 16, --32--
   byte ledMode = 2;         //Options: 1 = Red only, --2 = Red + IR--, 3 = Red + IR + Green
   int sampleRate = 50;      //Options: 50, 100, 200, 400, 800, 1000, 1600, --3200--
   int pulseWidth = 411;     //Options: 69, 118, 215, --411--
-  int adcRange = 4096;      //Options: 2048, --4096--, 8192, 16384
+  int adcRange = 16384;      //Options: 2048, --4096--, 8192, 16384
 
   particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange);  //Configure sensor with these settings
+  
+  particleSensor.setPulseAmplitudeRed(0); 
+  particleSensor.setPulseAmplitudeGreen(0);
+  
+  particleSensor.disableSlots();
+  particleSensor.enableSlot(2, 0x02); // Enable only SLOT_IR_LED = 0x02
 
   // Update to ignore readings under 30.000
   unblockedValue = 30000;
