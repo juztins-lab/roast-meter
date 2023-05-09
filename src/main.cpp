@@ -1,5 +1,6 @@
 // VERSION 1.0.0
 #include <ArduinoBLE.h>
+#include <EEPROM.h>
 #include <SFE_MicroOLED.h>
 #include <Wire.h>
 
@@ -14,20 +15,32 @@
 
 // -- EEPROM constants --
 
+#define EEPROM_MAX_LENGTH 256                  // 1024 bytes
+#define EEPROM_VALID_IDX 0                     // 1 byte
+#define EEPROM_VALID_CODE (0xA0)               // uint8
+#define EEPROM_LED_BRIGHTNESS_IDX 1            // 1 byte
+#define EEPROM_LED_BRIGHTNESS_DEFAULT 34       // uint8
+#define EEPROM_INTERSECTION_POINT_IDX 2        // 1 byte
+#define EEPROM_INTERSECTION_POINT_DEFAULT 117  // uint8
+#define EEPROM_DEVIATION_IDX 3                 // 1 byte
+#define EEPROM_DEVIATION_DEFAULT 0.165f        // float 32 bit 4 bytes
+#define EEPROM_BLE_NAME_IDX 128                // 64 byte - 1 byte length + 63 ASCII
+
 // -- End EEPROM constants
 
 // -- Global Variables --
 
-long unblockedValue;  // Average IR at power up
+long unblockedValue = 30000;  // Average IR at power up
+
 MAX30105 particleSensor;
 MicroOLED oled(PIN_RESET, DC_JUMPER);
 
 // -- End Global Variables --
 
-// -- Global Configs --
+// -- Global Setting --
 
 // The variable below calibrates the LED output on your hardware.
-byte ledBrightness = 34;
+byte ledBrightness;      // !EEPROM setup
 byte sampleAverage = 4;  // Options: 1, 2, 4, 8, 16, --32--
 byte ledMode = 2;        // Options: 1 = Red only, --2 = Red + IR--, 3 = Red + IR + Green
 int sampleRate = 50;     // Options: 50, 100, 200, 400, 800, 1000, 1600, --3200--
@@ -35,10 +48,20 @@ int pulseWidth = 411;    // Options: 69, 118, 215, --411--
 int adcRange = 4096;     // Options: 2048, --4096--, 8192, 16384
 
 // The variable below use to calculate Agtron from IR
-int intersectionPoint = 117;
-float deviation = 0.165;
+int intersectionPoint = 117;  // !EEPROM setup
+float deviation = 0.165;      // !EEPROM setup
 
-// -- End Global Configs --
+// BLE
+String bleName;  // !EEPROM setup
+
+// -- End Global Setting --
+
+// -- Setup Headers --
+
+void setupEEPROM();
+void setupBLE();
+
+// -- Setup Headers --
 
 // -- Sub Routine Headers --
 
@@ -50,12 +73,25 @@ void displayMeasurement(int rLevel);
 
 // -- BLE Function Headers --
 
+BLEService agtronService("875A0EE0-03DD-4225-AE06-35E8AE92B84C");
+BLEByteCharacteristic particleSensorCharacteristic("C32AFDBA-E9F2-453E-9612-85FBF4108AB2", BLERead);
+BLEByteCharacteristic agtronValueCharacteristic("CE216811-0AD9-4AFF-AE29-8B171093A95F", BLERead);
+
+BLEService settingService("59021473-DFC6-425A-9729-09310EBE535E");
+BLEByteCharacteristic ledBrightnessLevelCharacteristic("8313695F-3EA1-458B-BD2A-DF4AEE218514", BLERead | BLEWrite);
+BLEByteCharacteristic intersectionPointCharacteristic("69548C4B-87D0-4E3E-AC6C-B143C7B2AB30", BLERead | BLEWrite);
+BLEByteCharacteristic deviationCharacteristic("D17234FA-0F48-429A-9E9B-F5DB774EF682", BLERead | BLEWrite);
+BLEByteCharacteristic bleNameCharacteristic("CDE44FD7-4C1E-42A0-8368-531DC87F6B56", BLERead | BLEWrite);
+
 // -- End BLE Function Headers --
 
 // -- Utility Function Headers --
 
 String multiplyChar(char c, int n);
+String stringLastN(String input, int n);
 int mapIRToAgtron(int x);
+void writeStringToEEPROM(int addrOffset, const String &strToWrite);
+String readStringFromEEPROM(int addrOffset);
 
 // -- End Utillity Function Headers --
 
@@ -63,13 +99,15 @@ int mapIRToAgtron(int x);
 void setup() {
   Serial.begin(9600);
 
+  BLE.begin();
+
   Wire.begin();
+
   oled.begin();      // Initialize the OLED
   oled.clear(ALL);   // Clear the display's internal memory
   oled.clear(PAGE);  // Clear the buffer.
 
-  delay(100);  // Delay 100 ms
-  oled.setFontType(3);
+  setupEEPROM();
 
   // Initialize sensor
   if (particleSensor.begin(Wire, I2C_SPEED_FAST) == false)  // Use default I2C port, 400kHz speed
@@ -80,9 +118,6 @@ void setup() {
   }
 
   particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange);  // Configure sensor with these settings
-
-  // Update to ignore readings under 30.000
-  unblockedValue = 30000;
 }
 
 void loop() {
@@ -90,6 +125,87 @@ void loop() {
 }
 
 // -- End Main Process --
+
+// -- Setups --
+
+void setupEEPROM() {
+  EEPROM.init();
+  // You may choose to enable more or less EEPROM -
+  // Default length is 1024 bytes (if setLength is not called)
+  EEPROM.setLength(EEPROM_MAX_LENGTH);
+  // Note: larger sizes will increase RAM usage and execution time
+
+  // use EEPROM.get(int index, T type) to retrieve
+  // an arbitrary type from flash memory
+  uint8_t eeprom_valid;
+  EEPROM.get(EEPROM_VALID_IDX, eeprom_valid);
+
+  if (eeprom_valid != EEPROM_VALID_CODE) {
+    Serial.println("EEPROM was invalid");
+
+    // use EEPROM.put(int index, T type) to store
+    // a variable in psuedo-eeprom flash memory
+    // use a variable with a type so that EEPROM
+    // knows how much memory to use
+    uint8_t code_to_store = EEPROM_VALID_CODE;
+    EEPROM.put(EEPROM_VALID_IDX, code_to_store);
+
+    // store default LED brightness value in EEPROM
+    uint8_t led_brightness_to_store = EEPROM_LED_BRIGHTNESS_DEFAULT;
+    EEPROM.put(EEPROM_LED_BRIGHTNESS_IDX, led_brightness_to_store);
+
+    // store default intersection point value in EEPROM
+    uint8_t intersection_point_to_store = EEPROM_INTERSECTION_POINT_DEFAULT;
+    EEPROM.put(EEPROM_INTERSECTION_POINT_IDX, intersection_point_to_store);
+
+    // store default deviation value in EEPROM
+    float deviation_to_store = EEPROM_DEVIATION_DEFAULT;
+    EEPROM.put(EEPROM_DEVIATION_IDX, deviation_to_store);
+
+    // store default BLE name in EEPROM
+    BLE.begin();
+    String ble_name_to_store = "Roast Meter " + stringLastN(BLE.address(), 5);
+    writeStringToEEPROM(EEPROM_BLE_NAME_IDX, ble_name_to_store);
+
+    Serial.println("EEPROM initialized");
+  }
+
+  EEPROM.get(EEPROM_VALID_IDX, eeprom_valid);
+  if (eeprom_valid != EEPROM_VALID_CODE) {
+    Serial.println("EEPROM CAN NOT initialized");
+    while (1) {
+    };
+  }
+
+  Serial.println("EEPROM is valid");
+
+  // Load setting from EEPROM
+
+  uint8_t eeprom_led_brightness;
+  EEPROM.get(EEPROM_LED_BRIGHTNESS_IDX, eeprom_led_brightness);
+  ledBrightness = eeprom_led_brightness;
+  Serial.println("Set ledBrightness to " + String(ledBrightness));
+
+  uint8_t eeprom_intersection_point;
+  EEPROM.get(EEPROM_INTERSECTION_POINT_IDX, eeprom_intersection_point);
+  intersectionPoint = eeprom_intersection_point;
+  Serial.println("Set intersection point to " + String(intersectionPoint));
+
+  float eeprom_deviation;
+  EEPROM.get(EEPROM_DEVIATION_IDX, eeprom_deviation);
+  deviation = eeprom_deviation;
+  Serial.print("Set deviation to ");
+  Serial.print(deviation);
+  Serial.println();
+
+  bleName = readStringFromEEPROM(EEPROM_BLE_NAME_IDX);
+  Serial.println("Set BLE name to " + String(bleName));
+}
+
+void setupBLE() {
+}
+
+// -- End Setups --
 
 // Sub Routines
 
@@ -147,8 +263,33 @@ String multiplyChar(char c, int n) {
   return result;
 }
 
+String stringLastN(String input, int n) {
+  int inputSize = input.length();
+
+  return (n > 0 && inputSize > n) ? input.substring(inputSize - n) : "";
+}
+
 int mapIRToAgtron(int x) {
   return round(x - (intersectionPoint - x) * deviation);
 }
 
+void writeStringToEEPROM(int addrOffset, const String &strToWrite) {
+  byte len = strToWrite.length();
+  EEPROM.write(addrOffset, len);
+  for (int i = 0; i < len; i++) {
+    EEPROM.write(addrOffset + 1 + i, strToWrite[i]);
+  }
+}
+
+String readStringFromEEPROM(int addrOffset) {
+  int newStrLen = EEPROM.read(addrOffset);
+  char data[newStrLen + 1];
+
+  for (int i = 0; i < newStrLen; i++) {
+    data[i] = EEPROM.read(addrOffset + 1 + i);
+  }
+  data[newStrLen] = '\0';
+
+  return String(data);
+}
 // End Utillity Functions
