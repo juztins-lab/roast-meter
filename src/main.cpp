@@ -84,7 +84,7 @@ void displayMeasurement(int rLevel);
 // -- BLE Function Headers --
 
 BLEService roastMeterService(BLE_UUID_ROAST_METER_SERVICE);
-BLEByteCharacteristic particleSensorCharacteristic(BLE_UUID_PARTICLE_SENSOR, BLERead | BLENotify);
+BLEUnsignedIntCharacteristic particleSensorCharacteristic(BLE_UUID_PARTICLE_SENSOR, BLERead | BLENotify);
 BLEByteCharacteristic agtronCharacteristic(BLE_UUID_AGTRON, BLERead | BLENotify);
 
 BLEService settingService(BLE_UUID_SETTING_SERVICE);
@@ -140,6 +140,7 @@ void setup() {
 
 void loop() {
   measureSampleJob();
+  BLE.poll();
 }
 
 // -- End Main Process --
@@ -267,13 +268,25 @@ void setupBLE() {
 
 int measureSampleJobTimer = millis();
 void measureSampleJob() {
-  if (measureSampleJobTimer - millis() > 100) {
+  if (measureSampleJobTimer - millis() > 1000) {
     int rLevel = particleSensor.getIR();
     long currentDelta = rLevel - unblockedValue;
 
     if (currentDelta > (long)100) {
+      int calibratedAgtronLevel = mapIRToAgtron(rLevel / 1000);
+
+      agtronCharacteristic.writeValue(calibratedAgtronLevel);
+      particleSensorCharacteristic.writeValue(rLevel / 1000);
+
       displayMeasurement(rLevel / 1000);
+
+      Serial.println("real:" + String(rLevel));
+      Serial.println("agtron:" + String(calibratedAgtronLevel));
+      Serial.println("===========================");
     } else {
+      agtronCharacteristic.writeValue(0);
+      particleSensorCharacteristic.writeValue(0);
+
       displayPleaseLoadSample();
     }
     measureSampleJobTimer = millis();
@@ -288,21 +301,16 @@ void displayPleaseLoadSample() {
   oled.display();
 }
 
-void displayMeasurement(int rLevel) {
+void displayMeasurement(int agtronLevel) {
   oled.clear(PAGE);
   oled.setCursor(0, 0);
 
-  int calibratedReading = mapIRToAgtron(rLevel);
-  int centerPadding = 4 - String(calibratedReading).length();
+  int centerPadding = 4 - String(agtronLevel).length();
   String paddingText = multiplyChar(' ', centerPadding);
 
   oled.setFontType(3);
   oled.print(paddingText);
-  oled.print(calibratedReading);
-
-  Serial.println("real:" + String(rLevel));
-  Serial.println("agtron:" + String(calibratedReading));
-  Serial.println("===========================");
+  oled.print(agtronLevel);
 
   oled.display();
 }
