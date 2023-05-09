@@ -73,17 +73,24 @@ void displayMeasurement(int rLevel);
 
 // -- BLE Function Headers --
 
-BLEService agtronService("875A0EE0-03DD-4225-AE06-35E8AE92B84C");
-BLEByteCharacteristic particleSensorCharacteristic("C32AFDBA-E9F2-453E-9612-85FBF4108AB2", BLERead);
-BLEByteCharacteristic agtronValueCharacteristic("CE216811-0AD9-4AFF-AE29-8B171093A95F", BLERead);
+BLEService roastMeterService("875A0EE0-03DD-4225-AE06-35E8AE92B84C");
+BLEByteCharacteristic particleSensorCharacteristic("C32AFDBA-E9F2-453E-9612-85FBF4108AB2", BLERead | BLENotify);
+BLEByteCharacteristic agtronCharacteristic("CE216811-0AD9-4AFF-AE29-8B171093A95F", BLERead | BLENotify);
 
 BLEService settingService("59021473-DFC6-425A-9729-09310EBE535E");
 BLEByteCharacteristic ledBrightnessLevelCharacteristic("8313695F-3EA1-458B-BD2A-DF4AEE218514", BLERead | BLEWrite);
 BLEByteCharacteristic intersectionPointCharacteristic("69548C4B-87D0-4E3E-AC6C-B143C7B2AB30", BLERead | BLEWrite);
-BLEByteCharacteristic deviationCharacteristic("D17234FA-0F48-429A-9E9B-F5DB774EF682", BLERead | BLEWrite);
-BLEByteCharacteristic bleNameCharacteristic("CDE44FD7-4C1E-42A0-8368-531DC87F6B56", BLERead | BLEWrite);
+BLEFloatCharacteristic deviationCharacteristic("D17234FA-0F48-429A-9E9B-F5DB774EF682", BLERead | BLEWrite);
+BLEStringCharacteristic bleNameCharacteristic("CDE44FD7-4C1E-42A0-8368-531DC87F6B56", BLERead | BLEWrite, 64);
 
 // -- End BLE Function Headers --
+
+// -- BLE Handler Headers --
+
+void blePeripheralConnectHandler(BLEDevice central);
+void blePeripheralDisconnectHandler(BLEDevice central);
+
+// -- End BLE Handler Headers --
 
 // -- Utility Function Headers --
 
@@ -108,6 +115,7 @@ void setup() {
   oled.clear(PAGE);  // Clear the buffer.
 
   setupEEPROM();
+  setupBLE();
 
   // Initialize sensor
   if (particleSensor.begin(Wire, I2C_SPEED_FAST) == false)  // Use default I2C port, 400kHz speed
@@ -203,6 +211,44 @@ void setupEEPROM() {
 }
 
 void setupBLE() {
+  if (!BLE.begin()) {
+    Serial.println("starting Bluetooth® Low Energy module failed!");
+  }
+
+  // set the local name peripheral advertises
+  BLE.setLocalName(bleName.c_str());
+  // set the UUID for the service this peripheral advertises
+  BLE.setAdvertisedService(roastMeterService);
+
+  // add the characteristic to the service
+  roastMeterService.addCharacteristic(particleSensorCharacteristic);
+  roastMeterService.addCharacteristic(agtronCharacteristic);
+
+  settingService.addCharacteristic(ledBrightnessLevelCharacteristic);
+  settingService.addCharacteristic(intersectionPointCharacteristic);
+  settingService.addCharacteristic(deviationCharacteristic);
+  settingService.addCharacteristic(bleNameCharacteristic);
+
+  // add service
+  BLE.addService(roastMeterService);
+  BLE.addService(settingService);
+
+  // assign event handlers for connected, disconnected to peripheral
+  BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
+  BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
+
+  particleSensorCharacteristic.setValue(0);
+  agtronCharacteristic.setValue(0);
+
+  ledBrightnessLevelCharacteristic.setValue(ledBrightness);
+  intersectionPointCharacteristic.setValue(intersectionPoint);
+  deviationCharacteristic.setValue(deviation);
+  bleNameCharacteristic.setValue(bleName);
+
+  // start advertising
+  BLE.advertise();
+
+  Serial.println(("Bluetooth® device active, waiting for connections..."));
 }
 
 // -- End Setups --
@@ -251,9 +297,25 @@ void displayMeasurement(int rLevel) {
   oled.display();
 }
 
-// Sub Routines
+// -- End Sub Routines --
 
-// Utillity Functions
+// -- BLE Handler --
+
+void blePeripheralConnectHandler(BLEDevice central) {
+  // central connected event handler
+  Serial.print("BLE Connected event, central: ");
+  Serial.println(central.address());
+}
+
+void blePeripheralDisconnectHandler(BLEDevice central) {
+  // central disconnected event handler
+  Serial.print("BLE Disconnected event, central: ");
+  Serial.println(central.address());
+}
+
+// -- End BLE Handler --
+
+// -- Utillity Functions --
 
 String multiplyChar(char c, int n) {
   String result = "";
@@ -273,6 +335,7 @@ int mapIRToAgtron(int x) {
   return round(x - (intersectionPoint - x) * deviation);
 }
 
+// https://roboticsbackend.com/arduino-write-string-in-eeprom/
 void writeStringToEEPROM(int addrOffset, const String &strToWrite) {
   byte len = strToWrite.length();
   EEPROM.write(addrOffset, len);
@@ -292,4 +355,5 @@ String readStringFromEEPROM(int addrOffset) {
 
   return String(data);
 }
-// End Utillity Functions
+
+// -- End Utillity Functions --
