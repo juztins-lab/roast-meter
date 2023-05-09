@@ -19,6 +19,13 @@ String multiplyChar(char c, int n) {
   return result;
 }
 
+int f(int x) {
+  int intersectionPoint = 117;
+  float deviation = 0.165;
+
+  return round(x - (intersectionPoint - x) * deviation);
+}
+
 void displayMeasurement(int rLevel) {
   oled.clear(PAGE);
   oled.setCursor(0, 0);
@@ -44,14 +51,6 @@ void displayMeasurement(int rLevel) {
 
   oled.display();
 }
-
-int f(int x) {
-  int intersectionPoint = 117;
-  float deviation = 0.165;
-
-  return round(x - (intersectionPoint - x) * deviation);
-}
-
 
 void setup() {
   Serial.begin(9600);
