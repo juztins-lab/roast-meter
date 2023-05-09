@@ -11,6 +11,16 @@
 #define PIN_RESET 9
 #define DC_JUMPER 1
 
+#define BLE_UUID_ROAST_METER_SERVICE "875A0EE0-03DD-4225-AE06-35E8AE92B84C"
+#define BLE_UUID_PARTICLE_SENSOR "C32AFDBA-E9F2-453E-9612-85FBF4108AB2"
+#define BLE_UUID_AGTRON "CE216811-0AD9-4AFF-AE29-8B171093A95F"
+
+#define BLE_UUID_SETTING_SERVICE "59021473-DFC6-425A-9729-09310EBE535E"
+#define BLE_UUID_LED_BRIGHTNESS "8313695F-3EA1-458B-BD2A-DF4AEE218514"
+#define BLE_UUID_INTERSECTION_POINT "69548C4B-87D0-4E3E-AC6C-B143C7B2AB30"
+#define BLE_UUID_DEVIATION "D17234FA-0F48-429A-9E9B-F5DB774EF682"
+#define BLE_UUID_BLE_NAME "CDE44FD7-4C1E-42A0-8368-531DC87F6B56"
+
 // -- End Constant Values --
 
 // -- EEPROM constants --
@@ -73,15 +83,15 @@ void displayMeasurement(int rLevel);
 
 // -- BLE Function Headers --
 
-BLEService roastMeterService("875A0EE0-03DD-4225-AE06-35E8AE92B84C");
-BLEByteCharacteristic particleSensorCharacteristic("C32AFDBA-E9F2-453E-9612-85FBF4108AB2", BLERead | BLENotify);
-BLEByteCharacteristic agtronCharacteristic("CE216811-0AD9-4AFF-AE29-8B171093A95F", BLERead | BLENotify);
+BLEService roastMeterService(BLE_UUID_ROAST_METER_SERVICE);
+BLEByteCharacteristic particleSensorCharacteristic(BLE_UUID_PARTICLE_SENSOR, BLERead | BLENotify);
+BLEByteCharacteristic agtronCharacteristic(BLE_UUID_AGTRON, BLERead | BLENotify);
 
-BLEService settingService("59021473-DFC6-425A-9729-09310EBE535E");
-BLEByteCharacteristic ledBrightnessLevelCharacteristic("8313695F-3EA1-458B-BD2A-DF4AEE218514", BLERead | BLEWrite);
-BLEByteCharacteristic intersectionPointCharacteristic("69548C4B-87D0-4E3E-AC6C-B143C7B2AB30", BLERead | BLEWrite);
-BLEFloatCharacteristic deviationCharacteristic("D17234FA-0F48-429A-9E9B-F5DB774EF682", BLERead | BLEWrite);
-BLEStringCharacteristic bleNameCharacteristic("CDE44FD7-4C1E-42A0-8368-531DC87F6B56", BLERead | BLEWrite, 64);
+BLEService settingService(BLE_UUID_SETTING_SERVICE);
+BLEByteCharacteristic ledBrightnessLevelCharacteristic(BLE_UUID_LED_BRIGHTNESS, BLERead | BLEWrite);
+BLEByteCharacteristic intersectionPointCharacteristic(BLE_UUID_INTERSECTION_POINT, BLERead | BLEWrite);
+BLEFloatCharacteristic deviationCharacteristic(BLE_UUID_DEVIATION, BLERead | BLEWrite);
+BLEStringCharacteristic bleNameCharacteristic(BLE_UUID_BLE_NAME, BLERead | BLEWrite, 64);
 
 // -- End BLE Function Headers --
 
