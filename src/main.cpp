@@ -75,6 +75,8 @@ void setupBLE();
 
 // -- Sub Routine Headers --
 
+void displayStartUp();
+void warmUpLED();
 void measureSampleJob();
 void displayPleaseLoadSample();
 void displayMeasurement(int rLevel);
@@ -136,6 +138,9 @@ void setup() {
   }
 
   particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange);  // Configure sensor with these settings
+
+  displayStartUp();
+  warmUpLED();
 }
 
 void loop() {
@@ -265,6 +270,32 @@ void setupBLE() {
 // -- End Setups --
 
 // Sub Routines
+
+void displayStartUp() {
+  oled.clear(PAGE);
+  oled.setCursor(0, 0);
+  oled.setFontType(1);
+  oled.print("Roast  ");
+  oled.print("Meter  ");
+  oled.print("v0.1   ");
+  oled.display();
+
+  delay(3000);
+}
+
+void warmUpLED() {
+  int seconds = 60;
+
+  while (--seconds > 0) {
+    oled.clear(PAGE);
+    oled.setCursor(0, 0);
+    oled.setFontType(1);
+    oled.print("Warm Up" + String(seconds) + "s");
+    oled.display();
+
+    delay(1000);
+  }
+}
 
 int measureSampleJobTimer = millis();
 void measureSampleJob() {
