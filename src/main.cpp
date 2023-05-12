@@ -70,6 +70,7 @@ String bleName;  // !EEPROM setup
 
 void setupEEPROM();
 void setupBLE();
+void setupParticleSensor();
 
 // -- Setup Headers --
 
@@ -101,6 +102,11 @@ BLEStringCharacteristic bleNameCharacteristic(BLE_UUID_BLE_NAME, BLERead | BLEWr
 
 void blePeripheralConnectHandler(BLEDevice central);
 void blePeripheralDisconnectHandler(BLEDevice central);
+
+void bleLEDBrightnessLevelWriten(BLEDevice central, BLECharacteristic characteristic);
+void bleIntersectionPointWriten(BLEDevice central, BLECharacteristic characteristic);
+void bleDeviationWriten(BLEDevice central, BLECharacteristic characteristic);
+void bleBLENameWriten(BLEDevice central, BLECharacteristic characteristic);
 
 // -- End BLE Handler Headers --
 
@@ -137,7 +143,7 @@ void setup() {
       ;
   }
 
-  particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange);  // Configure sensor with these settings
+  setupParticleSensor();
 
   displayStartUp();
   warmUpLED();
@@ -253,6 +259,12 @@ void setupBLE() {
   BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
   BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
 
+  ledBrightnessLevelCharacteristic.setEventHandler(BLEWritten, bleLEDBrightnessLevelWriten);
+  intersectionPointCharacteristic.setEventHandler(BLEWritten, bleIntersectionPointWriten);
+  deviationCharacteristic.setEventHandler(BLEWritten, bleDeviationWriten);
+  bleNameCharacteristic.setEventHandler(BLEWritten, bleBLENameWriten);
+
+  // Assign current value and setting for BLE Characteristic
   particleSensorCharacteristic.setValue(0);
   agtronCharacteristic.setValue(0);
 
@@ -265,6 +277,10 @@ void setupBLE() {
   BLE.advertise();
 
   Serial.println(("Bluetooth® device active, waiting for connections..."));
+}
+
+void setupParticleSensor() {
+  particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange);  // Configure sensor with these settings
 }
 
 // -- End Setups --
@@ -360,6 +376,53 @@ void blePeripheralDisconnectHandler(BLEDevice central) {
   // central disconnected event handler
   Serial.print("BLE Disconnected event, central: ");
   Serial.println(central.address());
+}
+
+void bleLEDBrightnessLevelWriten(BLEDevice central, BLECharacteristic characteristic) {
+  ledBrightness = ledBrightnessLevelCharacteristic.value();
+
+  Serial.print("bleLEDBrightnessLevelWriten event, written: ");
+  Serial.println(ledBrightness);
+
+  EEPROM.put(EEPROM_LED_BRIGHTNESS_IDX, ledBrightness);
+
+  setupParticleSensor();
+}
+
+void bleIntersectionPointWriten(BLEDevice central, BLECharacteristic characteristic) {
+  intersectionPoint = intersectionPointCharacteristic.value();
+
+  Serial.print("bleIntersectionPointWriten event, written: ");
+  Serial.println(intersectionPoint);
+
+  EEPROM.put(EEPROM_INTERSECTION_POINT_IDX, intersectionPoint);
+}
+
+void bleDeviationWriten(BLEDevice central, BLECharacteristic characteristic) {
+  deviation = deviationCharacteristic.value();
+
+  Serial.print("bleDeviationWriten event, written: ");
+  Serial.println(deviation);
+
+  EEPROM.put(EEPROM_DEVIATION_IDX, deviation);
+}
+
+void bleBLENameWriten(BLEDevice central, BLECharacteristic characteristic) {
+  String newBLEName = bleNameCharacteristic.value();
+
+  if (newBLEName.length() > 63) {
+    Serial.println("bleBLENameWriten event, written rejected!. String length exceed 63.");
+    bleNameCharacteristic.setValue(bleName.c_str());
+
+    return;
+  }
+
+  Serial.print("bleBLENameWriten event, written: ");
+  Serial.println(bleName);
+
+  BLE.setDeviceName(bleName.c_str());
+
+  writeStringToEEPROM(EEPROM_BLE_NAME_IDX, bleName);
 }
 
 // -- End BLE Handler --
