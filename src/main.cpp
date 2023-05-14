@@ -298,7 +298,7 @@ void setupBLE() {
   // Assign current value and setting for BLE Characteristic
   particleSensorCharacteristic.setValue(0);
   agtronCharacteristic.setValue(0);
-  meterStateCharacteristic.setValue(0);
+  meterStateCharacteristic.setValue(STATE_SETUP);
 
   ledBrightnessLevelCharacteristic.setValue(ledBrightness);
   intersectionPointCharacteristic.setValue(intersectionPoint);
@@ -335,21 +335,30 @@ void warmUpLED() {
   meterStateCharacteristic.writeValue(STATE_WARMUP);
 
   int seconds = 60;
+  unsigned long jobTimerStart = millis();
+  unsigned long jobTimer = jobTimerStart;
 
-  while (--seconds > 0) {
-    oled.clear(PAGE);
-    oled.setCursor(0, 0);
-    oled.setFontType(1);
-    oled.print("Warm Up" + String(seconds) + "s");
-    oled.display();
+  while (millis() - jobTimerStart <= 60 * 1000) {
+    if (millis() - jobTimer > 100) {
+      oled.clear(PAGE);
+      oled.setCursor(0, 0);
+      oled.setFontType(1);
 
-    delay(1000);
+      seconds = 60 - ((millis() - jobTimerStart) / 1000);
+
+      oled.print("Warm Up" + String(seconds) + "s");
+      oled.display();
+
+      jobTimer = millis();
+    }
+
+    BLE.poll();
   }
 }
 
-int measureSampleJobTimer = millis();
+unsigned long measureSampleJobTimer = millis();
 void measureSampleJob() {
-  if (measureSampleJobTimer - millis() > 1000) {
+  if (millis() - measureSampleJobTimer > 300) {
     int rLevel = particleSensor.getIR();
     long currentDelta = rLevel - unblockedValue;
 
@@ -358,7 +367,7 @@ void measureSampleJob() {
 
       agtronCharacteristic.writeValue(calibratedAgtronLevel);
       particleSensorCharacteristic.writeValue(rLevel / 1000);
-      meterStateCharacteristic.writeValue(3);
+      meterStateCharacteristic.writeValue(STATE_MEASURED);
 
       displayMeasurement(rLevel / 1000);
 
@@ -368,10 +377,11 @@ void measureSampleJob() {
     } else {
       agtronCharacteristic.writeValue(0);
       particleSensorCharacteristic.writeValue(0);
-      meterStateCharacteristic.writeValue(2);
+      meterStateCharacteristic.writeValue(STATE_READY);
 
       displayPleaseLoadSample();
     }
+
     measureSampleJobTimer = millis();
   }
 }
