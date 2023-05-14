@@ -14,12 +14,18 @@
 #define BLE_UUID_ROAST_METER_SERVICE "875A0EE0-03DD-4225-AE06-35E8AE92B84C"
 #define BLE_UUID_PARTICLE_SENSOR "C32AFDBA-E9F2-453E-9612-85FBF4108AB2"
 #define BLE_UUID_AGTRON "CE216811-0AD9-4AFF-AE29-8B171093A95F"
+#define BLE_UUID_METER_STATE "8ACE2828-996F-48E4-8E9C-8284678B4B57"
 
 #define BLE_UUID_SETTING_SERVICE "59021473-DFC6-425A-9729-09310EBE535E"
 #define BLE_UUID_LED_BRIGHTNESS "8313695F-3EA1-458B-BD2A-DF4AEE218514"
 #define BLE_UUID_INTERSECTION_POINT "69548C4B-87D0-4E3E-AC6C-B143C7B2AB30"
 #define BLE_UUID_DEVIATION "D17234FA-0F48-429A-9E9B-F5DB774EF682"
 #define BLE_UUID_BLE_NAME "CDE44FD7-4C1E-42A0-8368-531DC87F6B56"
+
+#define STATE_SETUP 0
+#define STATE_WARMUP 1
+#define STATE_READY 2
+#define STATE_MEASURED 3
 
 // -- End Constant Values --
 
@@ -85,15 +91,29 @@ void displayMeasurement(int rLevel);
 // -- End Sub Routine Headers --
 
 // -- BLE Function Headers --
-
 BLEService roastMeterService(BLE_UUID_ROAST_METER_SERVICE);
+
+BLEDescriptor particleSensorDescriptor("2901", "particle_sensor");
 BLEUnsignedIntCharacteristic particleSensorCharacteristic(BLE_UUID_PARTICLE_SENSOR, BLERead | BLENotify);
+
+BLEDescriptor agtronDescriptor("2901", "agtron");
 BLEByteCharacteristic agtronCharacteristic(BLE_UUID_AGTRON, BLERead | BLENotify);
 
+BLEDescriptor meterStateDescriptor("2901", "meter_state");
+BLEByteCharacteristic meterStateCharacteristic(BLE_UUID_AGTRON, BLERead | BLENotify);
+
 BLEService settingService(BLE_UUID_SETTING_SERVICE);
+
+BLEDescriptor ledBrightnessLevelDescriptor("2901", "led_brightness_level");
 BLEByteCharacteristic ledBrightnessLevelCharacteristic(BLE_UUID_LED_BRIGHTNESS, BLERead | BLEWrite);
+
+BLEDescriptor intersectionPointDescriptor("2901", "intersection_point");
 BLEByteCharacteristic intersectionPointCharacteristic(BLE_UUID_INTERSECTION_POINT, BLERead | BLEWrite);
+
+BLEDescriptor deviationDescriptor("2901", "deviation");
 BLEFloatCharacteristic deviationCharacteristic(BLE_UUID_DEVIATION, BLERead | BLEWrite);
+
+BLEDescriptor bleNameDescriptor("2901", "ble_name");
 BLEStringCharacteristic bleNameCharacteristic(BLE_UUID_BLE_NAME, BLERead | BLEWrite, 64);
 
 // -- End BLE Function Headers --
@@ -259,14 +279,26 @@ void setupBLE() {
   BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
   BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
 
+  agtronCharacteristic.addDescriptor(agtronDescriptor);
+  particleSensorCharacteristic.addDescriptor(particleSensorDescriptor);
+  meterStateCharacteristic.addDescriptor(meterStateDescriptor);
+
+  ledBrightnessLevelCharacteristic.addDescriptor(ledBrightnessLevelDescriptor);
   ledBrightnessLevelCharacteristic.setEventHandler(BLEWritten, bleLEDBrightnessLevelWriten);
+
+  intersectionPointCharacteristic.addDescriptor(intersectionPointDescriptor);
   intersectionPointCharacteristic.setEventHandler(BLEWritten, bleIntersectionPointWriten);
+
+  deviationCharacteristic.addDescriptor(deviationDescriptor);
   deviationCharacteristic.setEventHandler(BLEWritten, bleDeviationWriten);
+
+  bleNameCharacteristic.addDescriptor(bleNameDescriptor);
   bleNameCharacteristic.setEventHandler(BLEWritten, bleBLENameWriten);
 
   // Assign current value and setting for BLE Characteristic
   particleSensorCharacteristic.setValue(0);
   agtronCharacteristic.setValue(0);
+  meterStateCharacteristic.setValue(0);
 
   ledBrightnessLevelCharacteristic.setValue(ledBrightness);
   intersectionPointCharacteristic.setValue(intersectionPoint);
@@ -300,6 +332,8 @@ void displayStartUp() {
 }
 
 void warmUpLED() {
+  meterStateCharacteristic.writeValue(STATE_WARMUP);
+
   int seconds = 60;
 
   while (--seconds > 0) {
@@ -324,6 +358,7 @@ void measureSampleJob() {
 
       agtronCharacteristic.writeValue(calibratedAgtronLevel);
       particleSensorCharacteristic.writeValue(rLevel / 1000);
+      meterStateCharacteristic.writeValue(3);
 
       displayMeasurement(rLevel / 1000);
 
@@ -333,6 +368,7 @@ void measureSampleJob() {
     } else {
       agtronCharacteristic.writeValue(0);
       particleSensorCharacteristic.writeValue(0);
+      meterStateCharacteristic.writeValue(2);
 
       displayPleaseLoadSample();
     }
