@@ -7,6 +7,7 @@
 #include "MAX30105.h"
 
 // -- Constant Values --
+#define FIRMWARE_REVISION_STRING "v0.1"
 
 #define PIN_RESET 9
 #define DC_JUMPER 1
@@ -16,11 +17,15 @@
 #define BLE_UUID_AGTRON "CE216811-0AD9-4AFF-AE29-8B171093A95F"
 #define BLE_UUID_METER_STATE "8ACE2828-996F-48E4-8E9C-8284678B4B57"
 
+#define BLE_UUID_DEVICE_INFOMATION_SERVICE "180A"
+#define BLE_UUID_FIRMWARE_REVISION "2A26"
+
 #define BLE_UUID_SETTING_SERVICE "59021473-DFC6-425A-9729-09310EBE535E"
 #define BLE_UUID_LED_BRIGHTNESS "8313695F-3EA1-458B-BD2A-DF4AEE218514"
 #define BLE_UUID_INTERSECTION_POINT "69548C4B-87D0-4E3E-AC6C-B143C7B2AB30"
 #define BLE_UUID_DEVIATION "D17234FA-0F48-429A-9E9B-F5DB774EF682"
 #define BLE_UUID_BLE_NAME "CDE44FD7-4C1E-42A0-8368-531DC87F6B56"
+#define BLE_UUID_UNBLOCK_LEVEL "B8BEFA0C-FFDD-4096-9ACD-208657B4B73C"
 
 #define STATE_SETUP 0
 #define STATE_WARMUP 1
@@ -33,9 +38,9 @@
 
 #define EEPROM_MAX_LENGTH 256                  // 1024 bytes
 #define EEPROM_VALID_IDX 0                     // 1 byte
-#define EEPROM_VALID_CODE (0xA0)               // uint8
+#define EEPROM_VALID_CODE (0xAA)               // uint8
 #define EEPROM_LED_BRIGHTNESS_IDX 1            // 1 byte
-#define EEPROM_LED_BRIGHTNESS_DEFAULT 34       // uint8
+#define EEPROM_LED_BRIGHTNESS_DEFAULT 135      // uint8
 #define EEPROM_INTERSECTION_POINT_IDX 2        // 1 byte
 #define EEPROM_INTERSECTION_POINT_DEFAULT 117  // uint8
 #define EEPROM_DEVIATION_IDX 3                 // 1 byte
@@ -46,7 +51,7 @@
 
 // -- Global Variables --
 
-long unblockedValue = 30000;  // Average IR at power up
+uint32_t unblockedValue = 30000;  // Average IR at power up
 
 MAX30105 particleSensor;
 MicroOLED oled(PIN_RESET, DC_JUMPER);
@@ -61,7 +66,7 @@ byte sampleAverage = 4;  // Options: 1, 2, 4, 8, 16, --32--
 byte ledMode = 2;        // Options: 1 = Red only, --2 = Red + IR--, 3 = Red + IR + Green
 int sampleRate = 50;     // Options: 50, 100, 200, 400, 800, 1000, 1600, --3200--
 int pulseWidth = 411;    // Options: 69, 118, 215, --411--
-int adcRange = 4096;     // Options: 2048, --4096--, 8192, 16384
+int adcRange = 16384;    // Options: 2048, 4096, 8192, --16384--
 
 // The variable below use to calculate Agtron from IR
 int intersectionPoint = 117;  // !EEPROM setup
@@ -100,7 +105,7 @@ BLEDescriptor agtronDescriptor("2901", "agtron");
 BLEByteCharacteristic agtronCharacteristic(BLE_UUID_AGTRON, BLERead | BLENotify);
 
 BLEDescriptor meterStateDescriptor("2901", "meter_state");
-BLEByteCharacteristic meterStateCharacteristic(BLE_UUID_AGTRON, BLERead | BLENotify);
+BLEByteCharacteristic meterStateCharacteristic(BLE_UUID_METER_STATE, BLERead | BLENotify);
 
 BLEService settingService(BLE_UUID_SETTING_SERVICE);
 
@@ -115,6 +120,9 @@ BLEFloatCharacteristic deviationCharacteristic(BLE_UUID_DEVIATION, BLERead | BLE
 
 BLEDescriptor bleNameDescriptor("2901", "ble_name");
 BLEStringCharacteristic bleNameCharacteristic(BLE_UUID_BLE_NAME, BLERead | BLEWrite, 64);
+
+BLEService deviceInfomationService(BLE_UUID_DEVICE_INFOMATION_SERVICE);
+BLEStringCharacteristic firmwareRevisionCharacteristic(BLE_UUID_FIRMWARE_REVISION, BLERead | BLEWrite, 64);
 
 // -- End BLE Function Headers --
 
@@ -259,21 +267,26 @@ void setupBLE() {
 
   // set the local name peripheral advertises
   BLE.setLocalName(bleName.c_str());
+  BLE.setDeviceName(bleName.c_str());
   // set the UUID for the service this peripheral advertises
   BLE.setAdvertisedService(roastMeterService);
 
   // add the characteristic to the service
   roastMeterService.addCharacteristic(particleSensorCharacteristic);
   roastMeterService.addCharacteristic(agtronCharacteristic);
+  roastMeterService.addCharacteristic(meterStateCharacteristic);
 
   settingService.addCharacteristic(ledBrightnessLevelCharacteristic);
   settingService.addCharacteristic(intersectionPointCharacteristic);
   settingService.addCharacteristic(deviationCharacteristic);
   settingService.addCharacteristic(bleNameCharacteristic);
 
+  deviceInfomationService.addCharacteristic(firmwareRevisionCharacteristic);
+
   // add service
   BLE.addService(roastMeterService);
   BLE.addService(settingService);
+  BLE.addService(deviceInfomationService);
 
   // assign event handlers for connected, disconnected to peripheral
   BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
@@ -305,6 +318,8 @@ void setupBLE() {
   deviationCharacteristic.setValue(deviation);
   bleNameCharacteristic.setValue(bleName);
 
+  firmwareRevisionCharacteristic.writeValue(FIRMWARE_REVISION_STRING);
+
   // start advertising
   BLE.advertise();
 
@@ -313,6 +328,12 @@ void setupBLE() {
 
 void setupParticleSensor() {
   particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange);  // Configure sensor with these settings
+
+  particleSensor.setPulseAmplitudeRed(0);
+  particleSensor.setPulseAmplitudeGreen(0);
+
+  particleSensor.disableSlots();
+  particleSensor.enableSlot(2, 0x02);  // Enable only SLOT_IR_LED = 0x02
 }
 
 // -- End Setups --
@@ -325,28 +346,38 @@ void displayStartUp() {
   oled.setFontType(1);
   oled.print("Roast  ");
   oled.print("Meter  ");
-  oled.print("v0.1   ");
+  oled.print(FIRMWARE_REVISION_STRING);
   oled.display();
 
-  delay(3000);
+  delay(2000);
+
+  oled.clear(PAGE);
+  oled.setCursor(0, 0);
+  oled.setFontType(1);
+  oled.print(bleName);
+  oled.display();
+
+  delay(2000);
 }
 
 void warmUpLED() {
   meterStateCharacteristic.writeValue(STATE_WARMUP);
 
-  int seconds = 60;
+  int countDownSeconds = 60;
   unsigned long jobTimerStart = millis();
   unsigned long jobTimer = jobTimerStart;
 
   while (millis() - jobTimerStart <= 60 * 1000) {
-    if (millis() - jobTimer > 100) {
+    unsigned long elapsed = millis() - jobTimer;
+
+    if (elapsed > 100) {
       oled.clear(PAGE);
       oled.setCursor(0, 0);
       oled.setFontType(1);
 
-      seconds = 60 - ((millis() - jobTimerStart) / 1000);
+      countDownSeconds = 60 - ((millis() - jobTimerStart) / 1000);
 
-      oled.print("Warm Up" + String(seconds) + "s");
+      oled.print("Warm Up " + String(countDownSeconds) + "s");
       oled.display();
 
       jobTimer = millis();
@@ -358,9 +389,9 @@ void warmUpLED() {
 
 unsigned long measureSampleJobTimer = millis();
 void measureSampleJob() {
-  if (millis() - measureSampleJobTimer > 300) {
+  if (millis() - measureSampleJobTimer > 100) {
     int rLevel = particleSensor.getIR();
-    long currentDelta = rLevel - unblockedValue;
+    long currentDelta = (long)rLevel - (long)unblockedValue;
 
     if (currentDelta > (long)100) {
       int calibratedAgtronLevel = mapIRToAgtron(rLevel / 1000);
@@ -369,7 +400,7 @@ void measureSampleJob() {
       particleSensorCharacteristic.writeValue(rLevel / 1000);
       meterStateCharacteristic.writeValue(STATE_MEASURED);
 
-      displayMeasurement(rLevel / 1000);
+      displayMeasurement(calibratedAgtronLevel);
 
       Serial.println("real:" + String(rLevel));
       Serial.println("agtron:" + String(calibratedAgtronLevel));
@@ -463,9 +494,11 @@ void bleBLENameWriten(BLEDevice central, BLECharacteristic characteristic) {
     return;
   }
 
+  bleName = newBLEName;
   Serial.print("bleBLENameWriten event, written: ");
   Serial.println(bleName);
 
+  BLE.setLocalName(bleName.c_str());
   BLE.setDeviceName(bleName.c_str());
 
   writeStringToEEPROM(EEPROM_BLE_NAME_IDX, bleName);
