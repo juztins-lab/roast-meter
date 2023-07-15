@@ -30,10 +30,12 @@ Allows to adjust model automatically
 
 Script Requirements:
 Install Scripts or addins from GitHub
-<https://apps.autodesk.com/FUSION/en/Detail/Index?id=789800822168335025>
+~~<https://apps.autodesk.com/FUSION/en/Detail/Index?id=789800822168335025>~~
 
-roast-analyzer-case-customizer
-Use above install script to install directly from the directory (point to the base GitHub directory of the script ../3D Print/Parametric/roast-lmeter-case-customizer/)
+~~roast-analyzer-case-customizer~~
+~~Use above install script to install directly from the directory (point to the base GitHub directory of the script ../3D Print/Parametric/roast-meter-case-customizer/)~~
+Installer Script doesn't seem to work anymore. 
+Copy folder roast-meter-case-customizer to your Fusion360 Add-ins directory
 
 Run the script, two slider options one for Battery Length, other for Width. Can type in size as well. Model auto updates as sizes are changed. OK to save changes, then export lid and base for 3d printing. Note that the Lid exports by default upside down, don't forget to flip it in the slicer (using 3D Print Plus, you can export the Lid with the Z axis flipped so you don't have to flip it in the slicer)
 Drop down for OLED orientation - Vertical or Horizontal
