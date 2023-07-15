@@ -41,12 +41,10 @@ Run the script, two slider options one for Battery Length, other for Width. Can 
 Drop down for OLED orientation - Vertical or Horizontal
 Drop down for Power switch - off or on
 
-Recommend for exporting the lid and base - not strictly needed, but can easily export the two components at the same time without using the default make script:
-Use above install script to install
-<https://github.com/WilkoV/Fusion360_ExportIt>
-
-Alt exporter 3D Print Plus is also excellent:
+Recommend for exporting the lid and base:
+Alt exporter 3D Print Plus:
 <https://apps.autodesk.com/FUSION/en/Detail/Index?id=2942207745179825936>
+Lets you change the origin for the Lid while exporting so you don't have to flip the lid and tray in your slicer. 
 
 ## STL files
 
@@ -56,6 +54,13 @@ Exported v15 Lid NO Power switch - horizontal OLED
 Exported v7 Sensor Tray
 Exported v7 Sensor Tray Lid - WITH Power Switch
 Exported v7 Sensor Tray Lid - NO Power Switch
+
+2023-07-15
+New STL files in 20230715
+Base
+Tray
+Lid No Switch
+Lid w/ Switch
 
 ## printing info
 
