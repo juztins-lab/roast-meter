@@ -1,11 +1,11 @@
 Hi,
 
-The print files are now v. 2.0 - these files are done based on the redesign in Fusion360 by Nate.
-Functionally the same, but of course much prettier.
+The print files are now v. 2.1 - these files are done based on the redesign in Fusion360 by Nate.
+There are slight modifications as we have now created a base for the sensor which adds some sturdiness and accuracy of the mounting of the actual sensor.
 
-If you are planning on building the version with a battery there is a version with a switch. See instructions for the specifications of the switch.
-
-If you are planning to power the device of the USB port via a battery or other power source choose the lid without a switch.
+Please print the base, the correct lid and finally the tray for the sensor.
+See instructions for the specifications of the switch.
+If you are planning to power the device of the USB port via a USB-C power source choose the lid without a switch.
 
 The bottom is the same for both designs.
 
