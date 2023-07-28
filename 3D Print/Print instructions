@@ -1,7 +1,14 @@
 Hi,
 
-The print files are now v. 2.1 - these files are done based on the redesign in Fusion360 by Nate.
+The print files are now syncronized with the latest usable versions of the case design from https://github.com/PatrickFrN/roast-meter/ 
+These files are done based on the redesign in Fusion360 by Nate but maintained by PatrickN
 There are slight modifications as we have now created a base for the sensor which adds some sturdiness and accuracy of the mounting of the actual sensor.
+
+The full roast meter requires you to print 3 parts:
+1: The base, which holds the artemis board and battery (Optional)
+2: The lid - You can choose a lid with room for a switch and one which does not have a switch.
+- If you choose not to install a battery and power via USB-C port then you will choose the lid without switch
+3: The Sensor Tray, used to mount and keep the MAX30101 sensor in place
 
 Please print the base, the correct lid and finally the tray for the sensor.
 See instructions for the specifications of the switch.
