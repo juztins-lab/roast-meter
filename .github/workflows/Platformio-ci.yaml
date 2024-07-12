@@ -10,6 +10,9 @@ jobs:
     name: Build Roast Meter BLE firmware
     runs-on: ubuntu-latest
 
+    env:
+      PIO_ENV: "SparkFun_Thing_Plus_Artemis"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -31,7 +34,7 @@ jobs:
         run: pio platform install git+https://github.com/nigelb/platform-apollo3blue
 
       - name: Update environment with Appolo3 framework
-        run: pio project init -e SparkFun_Thing_Plus_Artemis -O'platform_packages=framework-arduinoapollo3@https://github.com/sparkfun/Arduino_Apollo3#v2.2.2'
+        run: pio project init -e ${{ env.PIO_ENV }} -O'platform_packages=framework-arduinoapollo3@https://github.com/sparkfun/Arduino_Apollo3#v2.2.2'
 
       - name: Install Platformio Libraries
         run: pio pkg install
@@ -53,14 +56,14 @@ jobs:
               platformio.ini
 
       - name: Build PlatformIO Project
-        run: pio run
+        run: pio run -e ${{ env.PIO_ENV }}
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Firmware
           path: |
-            .pio/build/SparkFun_Thing_Plus_Artemis/firmware.bin
+            .pio/build/${{ env.PIO_ENV }}/firmware.bin
 
   UploadAssets:
     name: Upload Assets
