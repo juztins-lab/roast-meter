@@ -1,5 +1,5 @@
 version-template: '$MAJOR.$MINOR'
-name-template: 'v$RESOLVED_VERSION 🌈'
+name-template: 'v$RESOLVED_VERSION 🎉'
 tag-template: 'v$RESOLVED_VERSION'
 
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
