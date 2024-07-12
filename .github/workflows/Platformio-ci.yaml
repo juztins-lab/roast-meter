@@ -59,10 +59,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Firmware
-          path: .
-#          path: |
-#            .pio/build/SparkFun_Thing_Plus_Artemis/firmware.bin
-#
+          path: |
+            .pio/build/SparkFun_Thing_Plus_Artemis/firmware.bin
+
   UploadAssets:
     name: Upload Assets
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
