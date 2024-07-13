@@ -14,7 +14,7 @@ jobs:
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
     env:
-      firmware_zip: 'Roast Meter BLE Firmware-${{ github.ref_name }}.zip'
+      firmware_name: 'Roast Meter BLE Firmware-${{ github.ref_name }}.bin'
 
     steps:
       - id: download
@@ -22,13 +22,13 @@ jobs:
         with:
           merge-multiple: true
 
-      - id: zip_firmware
-        run: zip -r -5 '${{ env.firmware_zip }}' .
+      - id: firmware_name
+        run: mv firmware.bin '${{ env.firmware_name }}'
       
       - id: upload_assets
         name: Upload assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ${{ env.firmware_zip }}
+            ${{ env.firmware_name }}
           generate_release_notes: false
