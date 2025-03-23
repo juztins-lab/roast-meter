@@ -78,8 +78,8 @@ https://github.com/juztins-lab/roast-meter/wiki/Roast-Meter-User's-Guide#calibra
 ## Roadmap
 * ~~Calibration against Agtron Gourmet Scale~~ (DONE)
 * ~~Add battery, on/off button~~ (DONE)
-* Sensor calibration process - improved for consistency
-* Mobile application to store coffee roast information as well as roast level and history (bluetooth)
+* ~~Sensor calibration process - improved for consistency~~ (DONE)
+* ~~Mobile application to store coffee roast information as well as roast level and history (bluetooth)~~ (BT version available but works with **external** web app)
 
 See the [open issues](https://github.com/juztins-lab/roast-meter/issues) for a list of proposed features (and known issues).
 
