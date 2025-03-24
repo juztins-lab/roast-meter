@@ -7,7 +7,9 @@
 #include "MAX30105.h"
 
 // -- Constant Values --
+#ifndef FIRMWARE_REVISION_STRING
 #define FIRMWARE_REVISION_STRING "v0.1"
+#endif  //FIRMWARE_REVISION_STRING
 
 #define PIN_RESET 9
 #define DC_JUMPER 1
@@ -346,6 +348,7 @@ void displayStartUp() {
   oled.setFontType(1);
   oled.print("Roast  ");
   oled.print("Meter  ");
+  oled.setFontType(0);
   oled.print(FIRMWARE_REVISION_STRING);
   oled.display();
 

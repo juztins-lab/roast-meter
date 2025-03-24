@@ -1,0 +1,34 @@
+name: "Upload Release Assets"
+
+# Controls when the action will run.
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+
+
+jobs:
+  UploadAssets:
+    name: Upload Assets
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-latest
+    env:
+      firmware_name: 'Roast Meter BLE Firmware-${{ github.ref_name }}.bin'
+
+    steps:
+      - id: download
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - id: firmware_name
+        run: mv firmware.bin '${{ env.firmware_name }}'
+      
+      - id: upload_assets
+        name: Upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.firmware_name }}
+          generate_release_notes: false

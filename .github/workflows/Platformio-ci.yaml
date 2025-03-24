@@ -1,0 +1,73 @@
+name: PlatformIO CI
+
+on: [push]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Roast Meter BLE firmware
+    runs-on: ubuntu-latest
+
+    env:
+      PIO_ENV: "SparkFun_Thing_Plus_Artemis"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-${{ hashfiles('platformio.ini') }}-pio
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+
+      - name: Install Appolo3 Blue platform
+        run: pio platform install git+https://github.com/nigelb/platform-apollo3blue
+
+      - name: Update environment with Appolo3 framework
+        run: pio project init -e ${{ env.PIO_ENV }} -O'platform_packages=framework-arduinoapollo3@https://github.com/sparkfun/Arduino_Apollo3#v2.2.2'
+
+      - name: Install Platformio Libraries
+        run: pio pkg install
+
+      - id: setTextVars
+        name: Set Environment varitables
+        run: |
+          COMMIT_HASH=$(echo ${{ github.sha }} | cut -c1-6)
+          echo "COMMIT_HASH=${COMMIT_HASH}" >> "$GITHUB_ENV"
+          # ?TAG
+          echo "GIT_TAG=$(git tag --points-at HEAD)" >> "$GITHUB_ENV"
+      
+      - name: Replace Version ID
+        id: update_build_versions
+        run: |
+          ${{ env.GIT_TAG && 'VERSION="$GIT_TAG\\\\r\\\\nGIT:$COMMIT_HASH"' || 'VERSION="GIT:$COMMIT_HASH"' }}
+          sed -i -E \
+              "s/^(\s+\-D\s?FIRMWARE_REVISION_STRING).+\$/\1='\"$VERSION\"'/" \
+              platformio.ini
+
+      - name: Build PlatformIO Project
+        run: pio run -e ${{ env.PIO_ENV }}
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Firmware
+          path: |
+            .pio/build/${{ env.PIO_ENV }}/firmware.bin
+
+  UploadAssets:
+    name: Upload Assets
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    needs:
+      - build
+    uses: ./.github/workflows/upload-release-assets.yaml
